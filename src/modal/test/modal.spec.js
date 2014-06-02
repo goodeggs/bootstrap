@@ -1,5 +1,5 @@
 describe('$modal', function () {
-  var $controllerProvider, $rootScope, $document, $compile, $templateCache, $timeout, $q;
+  var $controllerProvider, $rootScope, $document, $compile, $templateCache, $timeout, $q, $browser;
   var $modal, $modalProvider;
 
   var triggerKeyDown = function (element, keyCode) {
@@ -24,7 +24,7 @@ describe('$modal', function () {
     $modalProvider = _$modalProvider_;
   }));
 
-  beforeEach(inject(function (_$rootScope_, _$document_, _$compile_, _$templateCache_, _$timeout_, _$q_, _$modal_) {
+  beforeEach(inject(function (_$rootScope_, _$document_, _$compile_, _$templateCache_, _$timeout_, _$q_, _$modal_, _$browser_) {
     $rootScope = _$rootScope_;
     $document = _$document_;
     $compile = _$compile_;
@@ -32,6 +32,7 @@ describe('$modal', function () {
     $timeout = _$timeout_;
     $q = _$q_;
     $modal = _$modal_;
+    $browser = _$browser_;
   }));
 
   beforeEach(function () {
@@ -164,6 +165,21 @@ describe('$modal', function () {
       expect($document).toHaveModalsOpen(0);
 
       close(modal, 'closing in test');
+    });
+
+    it('should only notifyWhenNoOutstandingRequests after the modal is completely open', function() {
+      var notified = false;
+
+      $browser.notifyWhenNoOutstandingRequests(function() {
+        notified = true;
+      });
+
+      var modal = $modal.open({template: '<div>Content</div>'});
+      expect(notified).toBeFalsy();
+
+      $rootScope.$digest();
+
+      expect(notified).toBeTruthy();
     });
 
     it('should open a modal from templateUrl', function () {
